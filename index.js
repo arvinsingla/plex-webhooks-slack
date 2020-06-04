@@ -39,6 +39,7 @@ app.post("/", async (req, res, next) => {
   };
 
   if (Object.keys(allowedPlexWebhooks).includes(payload.event)) {
+    console.log(`Notifying slack for event ${payload.event}`);
     notifySlack(payload, allowedPlexWebhooks[payload.event]);
   } else {
     console.log(`${payload.event} is not an allowed webhook`);
