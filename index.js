@@ -1,11 +1,19 @@
 const express = require("express");
 const morgan = require("morgan");
 const Slack = require("slack-node");
-const bodyParser = require("body-parser");
+const multer = require("multer");
+const upload = multer({ storage: multer.memoryStorage() });
+
 /**
  * Setup
  */
 const channel = process.env.SLACK_CHANNEL;
+const allowedPlexWebhooks = {
+  "media.play": "Started",
+  "media.scrobble": "Finished",
+  "media.rate": "Rated",
+  "library.new": "Added",
+};
 
 /**
  * Slack
@@ -19,7 +27,6 @@ slack.setWebhook(process.env.SLACK_URL);
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(bodyParser.json());
 app.use(morgan("dev"));
 app.listen(port, () => {
   console.log(`Express app running at http://localhost:${port}`);
@@ -28,15 +35,8 @@ app.listen(port, () => {
 /**
  * Express Routes
  */
-app.post("/", async (req, res, next) => {
-  const payload = req.body;
-
-  const allowedPlexWebhooks = {
-    "media.play": "Started",
-    "media.scrobble": "Finished",
-    "media.rate": "Rated",
-    "library.new": "Added",
-  };
+app.post("/", upload.single("thumb"), (req, res, next) => {
+  const payload = JSON.parse(req.body.payload);
 
   if (Object.keys(allowedPlexWebhooks).includes(payload.event)) {
     console.log(`Notifying slack for event ${payload.event}`);
