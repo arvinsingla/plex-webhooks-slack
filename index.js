@@ -113,7 +113,7 @@ function notifySlack(payload, action) {
           color: "#a67a2d",
           title: formatTitle(payload.Metadata),
           text: formatSubtitle(payload.Metadata),
-          footer: `${action} by ${payload.Account.title}`,
+          footer: `${action} by ${payload.Account.title} on ${payload.Server.title}`,
           footer_icon: payload.Account.thumb,
         },
       ],
