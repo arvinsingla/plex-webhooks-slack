@@ -29,7 +29,7 @@ app.listen(port, () => {
  * Express Routes
  */
 app.post("/", async (req, res, next) => {
-  const { payload } = req.body;
+  const payload = req.body;
 
   const allowedPlexWebhooks = {
     "media.play": "Started",
