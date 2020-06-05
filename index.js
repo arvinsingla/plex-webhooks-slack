@@ -1,7 +1,7 @@
-const express = require("express");
-const morgan = require("morgan");
-const Slack = require("slack-node");
-const multer = require("multer");
+const express = require('express');
+const morgan = require('morgan');
+const Slack = require('slack-node');
+const multer = require('multer');
 const upload = multer({ storage: multer.memoryStorage() });
 
 /**
@@ -9,10 +9,10 @@ const upload = multer({ storage: multer.memoryStorage() });
  */
 const channel = process.env.SLACK_CHANNEL;
 const allowedPlexWebhooks = {
-  "media.play": "Started",
-  "media.scrobble": "Finished",
-  "media.rate": "Rated",
-  "library.new": "Added",
+  'media.play': 'Started',
+  'media.scrobble': 'Finished',
+  'media.rate': 'Rated',
+  'library.new': 'Added'
 };
 
 /**
@@ -27,7 +27,7 @@ slack.setWebhook(process.env.SLACK_URL);
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(morgan("dev"));
+app.use(morgan('dev'));
 app.listen(port, () => {
   console.log(`Express app running at http://localhost:${port}`);
 });
@@ -35,7 +35,7 @@ app.listen(port, () => {
 /**
  * Express Routes
  */
-app.post("/", upload.single("thumb"), (req, res, next) => {
+app.post('/', upload.single('thumb'), (req, res, next) => {
   const payload = JSON.parse(req.body.payload);
 
   if (Object.keys(allowedPlexWebhooks).includes(payload.event)) {
@@ -53,7 +53,7 @@ app.post("/", upload.single("thumb"), (req, res, next) => {
  */
 
 app.use((req, res, next) => {
-  const err = new Error("Not Found");
+  const err = new Error('Not Found');
   err.status = 404;
   next(err);
 });
@@ -80,10 +80,10 @@ function formatTitle(metadata) {
 }
 
 function formatSubtitle(metadata) {
-  let ret = "";
+  let ret = '';
 
   if (metadata.grandparentTitle) {
-    if (metadata.type === "track") {
+    if (metadata.type === 'track') {
       ret = metadata.parentTitle;
     } else if (metadata.index && metadata.parentIndex) {
       ret = `S${metadata.parentIndex} E${metadata.index}`;
@@ -92,10 +92,10 @@ function formatSubtitle(metadata) {
     }
 
     if (metadata.title) {
-      ret += " - " + metadata.title;
+      ret += ' - ' + metadata.title;
     }
-  } else if (metadata.type === "movie") {
-    ret = metadata.tagline;
+  } else if (metadata.type === 'movie') {
+    ret = metadata.summary ? metadata.summary : metadata.tagline;
   }
 
   return ret;
@@ -105,18 +105,18 @@ function notifySlack(payload, action) {
   slack.webhook(
     {
       channel,
-      username: "Plex",
-      icon_emoji: ":plex:",
+      username: 'Plex',
+      icon_emoji: ':plex:',
       attachments: [
         {
-          fallback: "Required plain-text summary of the attachment.",
-          color: "#a67a2d",
+          fallback: 'Required plain-text summary of the attachment.',
+          color: '#a67a2d',
           title: formatTitle(payload.Metadata),
           text: formatSubtitle(payload.Metadata),
           footer: `${action} by ${payload.Account.title} on ${payload.Server.title}`,
-          footer_icon: payload.Account.thumb,
-        },
-      ],
+          footer_icon: payload.Account.thumb
+        }
+      ]
     },
     () => {}
   );
